@@ -1,4 +1,4 @@
-name: fTetWild
+name: PolyFEM
 
 on:
   push:
@@ -10,29 +10,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Checkout fTetWild
+      - name: Checkout PolyFEM
         uses: actions/checkout@v4
         with:
-          repository: wildmeshing/fTetWild
-          path: fTetWild
+          repository: polyfem/polyfem
+          path: polyfem
       - name: Configure
         run: |-
           mkdir -p -v "build"
           pushd "build"
-          cmake .. -D CMAKE_BUILD_TYPE=Release
-        working-directory: fTetWild
+          cmake .. \
+            -D CMAKE_BUILD_TYPE=Release \
+            -D POLYFEM_THREADING=TBB \
+            -D POLYSOLVE_WITH_MKL=OFF
+        working-directory: polyfem
       - name: Build
         run: |-
-          make --jobs
+          make --jobs=4
           mkdir -p -v "${{ github.workspace }}/dist"
-          install -m u=rwx,go=rx -v FloatTetwild_bin "${{ github.workspace }}/dist/fTetWild-${{ runner.arch }}-${{ runner.os }}"
-        working-directory: fTetWild/build
-      - name: Test
-        run: dist/fTetWild-* --help
+          install -m u=rwx,go=rx -v PolyFEM_bin "${{ github.workspace }}/dist/PolyFEM-${{ runner.arch }}-${{ runner.os }}"
+        working-directory: polyfem/build
+      - name: Help
+        run: dist/PolyFEM-* --help
+      - name: Tests
+        run: ctest --verbose --output-on-failure
+        working-directory: polyfem/build
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fTetWild-${{ runner.arch }}-${{ runner.os }}
+          name: PolyFEM-${{ runner.arch }}-${{ runner.os }}
           path: dist
     strategy:
       matrix:
@@ -57,10 +63,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: dist
-          pattern: fTetWild-*
+          pattern: PolyFEM-*
           merge-multiple: true
       - name: Create GitHub Release
         uses: liblaf/repo/.github/actions/release@main
         with:
-          tag: fTetWild
+          tag: PolyFEM
           files: dist/*
