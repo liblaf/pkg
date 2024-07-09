@@ -1,0 +1,56 @@
+name: fTetWild
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Checkout fTetWild
+        uses: actions/checkout@v4
+        with:
+          repository: wildmeshing/fTetWild
+          path: fTetWild
+      - name: Build
+        run: bash "pkg/fTetWild/build.sh"
+        working-directory: fTetWild
+        env:
+          DIST_DIR: ${{ github.workspace }}/dist
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: fTetWild-${{ runner.arch }}-${{ runner.os }}
+          path: dist
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+
+  release:
+    name: Release
+    permissions:
+      contents: write
+    needs:
+      - build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: fTetWild-*
+          merge-multiple: true
+      - name: Create GitHub Release
+        uses: liblaf/repo/.github/actions/release@main
+        with:
+          tag: fTetWild
+          files: dist/*
