@@ -21,7 +21,7 @@ jobs:
         env:
           DIST_DIR: ${{ github.workspace }}/dist
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: fTetWild-${{ runner.arch }}-${{ runner.os }}
           path: dist
