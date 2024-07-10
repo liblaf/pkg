@@ -13,15 +13,10 @@ jobs:
       - name: Checkout PolyFEM
         uses: actions/checkout@v4
         with:
-          repository: polyfem/polyfem
+          repository: liblaf/polyfem
           path: polyfem
-      - name: Dependencies
-        run: |-
-          sudo apt-get update
-          sudo apt-get install libblas-dev
       - name: Configure
         run: |-
-          cp -v "${{ github.workspace }}/pkg/PolyFEM/PolyFEMOptions.cmake" "PolyFEMOptions.cmake"
           mkdir -p -v "build"
           pushd "build"
           cmake .. -D CMAKE_BUILD_TYPE=Release
