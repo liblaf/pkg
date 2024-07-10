@@ -15,14 +15,16 @@ jobs:
         with:
           repository: polyfem/polyfem
           path: polyfem
+      - name: Dependencies
+        run: |-
+          sudo apt-get update
+          sudo apt-get install libblas-dev
       - name: Configure
         run: |-
+          cp -v "${{ github.workspace }}/pkg/PolyFEM/PolyFEMOptions.cmake" "PolyFEMOptions.cmake"
           mkdir -p -v "build"
           pushd "build"
-          cmake .. \
-            -D CMAKE_BUILD_TYPE=Release \
-            -D POLYFEM_THREADING=TBB \
-            -D POLYSOLVE_WITH_MKL=OFF
+          cmake .. -D CMAKE_BUILD_TYPE=Release
         working-directory: polyfem
       - name: Build
         run: |-
