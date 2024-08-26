@@ -20,7 +20,7 @@ jobs:
       - name: Build
         run: |-
           go build
-          install -D --no-target-directory --verbose domain-list-community "${{ github.workspace }}/dist/domain-list-community-${{ matrix.GOOS }}-${{ matrix.GOARCH }}""
+          install -D --no-target-directory --verbose domain-list-community "${{ github.workspace }}/dist/domain-list-community-${{ matrix.GOOS }}-${{ matrix.GOARCH }}"
         working-directory: domain-list-community
         env:
           GOOS: ${{ matrix.GOOS }}
