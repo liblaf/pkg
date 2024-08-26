@@ -1,0 +1,69 @@
+name: domain-list-community
+
+on:
+  push:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Checkout domain-list-community
+        uses: actions/checkout@v4
+        with:
+          repository: v2fly/domain-list-community
+          path: domain-list-community
+      - name: Setup Go
+        uses: actions/setup-go@v5
+      - name: Build
+        run: |-
+          go build
+          install -D --no-target-directory --verbose domain-list-community "${{ github.workspace }}/dist/domain-list-community-${{ matrix.GOOS }}-${{ matrix.GOARCH }}""
+        working-directory: domain-list-community
+        env:
+          GOOS: ${{ matrix.GOOS }}
+          GOARCH: ${{ matrix.GOARCH }}
+      - if: matrix.GOARCH == 'amd64' && matrix.GOOS == 'linux'
+        name: Test
+        run: dist/domain-list-community --help
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: domain-list-community-${{ matrix.GOARCH }}-${{ matrix.GOOS }}
+          path: dist
+    strategy:
+      matrix:
+        include:
+          - GOARCH: arm64
+            GOOS: darwin
+          - GOARCH: amd64
+            GOOS: linux
+          - GOARCH: amd64
+            GOOS: windows
+      fail-fast: false
+
+  release:
+    name: Release
+    permissions:
+      contents: write
+    needs:
+      - build
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: domain-list-community-*
+          merge-multiple: true
+      - name: Create GitHub Release
+        uses: liblaf/repo/.github/actions/release@main
+        with:
+          tag: domain-list-community
+          files: dist/*
