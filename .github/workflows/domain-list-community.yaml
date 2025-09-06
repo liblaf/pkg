@@ -16,7 +16,7 @@ jobs:
           repository: v2fly/domain-list-community
           path: domain-list-community
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
       - name: Build
         run: |-
           go build
