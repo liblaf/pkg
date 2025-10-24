@@ -30,7 +30,7 @@ jobs:
       - name: Test
         run: dist/fTetWild-* --help
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: fTetWild-${{ runner.arch }}-${{ runner.os }}
           path: dist
@@ -54,7 +54,7 @@ jobs:
       cancel-in-progress: true
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           path: dist
           pattern: fTetWild-*
